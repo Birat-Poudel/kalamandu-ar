@@ -5,7 +5,7 @@
 // Imports only related to wrapper
 import {
 	Object3D
-} from "../../build/three.module.js";
+} from "../../../build/three.module.js";
 import {
 	CodeBuilderInstructions,
 	WorkerExecutionSupport
@@ -29,9 +29,9 @@ import {
  * @param [LoadingManager] manager The loadingManager for the loader to use. Default is {@link LoadingManager}
  * @constructor
  */
-const OBJLoader2Parallel = function (manager) {
+const OBJLoader2Parallel = function ( manager ) {
 
-	OBJLoader2.call(this, manager);
+	OBJLoader2.call( this, manager );
 	this.preferJsmWorker = false;
 	this.jsmWorkerUrl = null;
 
@@ -41,10 +41,10 @@ const OBJLoader2Parallel = function (manager) {
 };
 
 OBJLoader2Parallel.OBJLOADER2_PARALLEL_VERSION = '3.2.0';
-console.info('Using OBJLoader2Parallel version: ' + OBJLoader2Parallel.OBJLOADER2_PARALLEL_VERSION);
+console.info( 'Using OBJLoader2Parallel version: ' + OBJLoader2Parallel.OBJLOADER2_PARALLEL_VERSION );
 OBJLoader2Parallel.DEFAULT_JSM_WORKER_PATH = './jsm/loaders/obj2/worker/parallel/OBJLoader2JsmWorker.js';
 
-OBJLoader2Parallel.prototype = Object.assign(Object.create(OBJLoader2.prototype), {
+OBJLoader2Parallel.prototype = Object.assign( Object.create( OBJLoader2.prototype ), {
 
 	constructor: OBJLoader2Parallel,
 
@@ -54,7 +54,7 @@ OBJLoader2Parallel.prototype = Object.assign(Object.create(OBJLoader2.prototype)
 	 * @param {boolean} executeParallel True or False
 	 * @return {OBJLoader2Parallel}
 	 */
-	setExecuteParallel: function (executeParallel) {
+	setExecuteParallel: function ( executeParallel ) {
 
 		this.executeParallel = executeParallel === true;
 		return this;
@@ -67,11 +67,11 @@ OBJLoader2Parallel.prototype = Object.assign(Object.create(OBJLoader2.prototype)
 	 * @param {URL} jsmWorkerUrl Provide complete jsm worker URL otherwise relative path to this module may not be correct
 	 * @return {OBJLoader2Parallel}
 	 */
-	setJsmWorker: function (preferJsmWorker, jsmWorkerUrl) {
+	setJsmWorker: function ( preferJsmWorker, jsmWorkerUrl ) {
 
 		this.preferJsmWorker = preferJsmWorker === true;
 
-		if (jsmWorkerUrl === undefined || jsmWorkerUrl === null) {
+		if ( jsmWorkerUrl === undefined || jsmWorkerUrl === null ) {
 
 			throw "The url to the jsm worker is not valid. Aborting...";
 
@@ -99,26 +99,26 @@ OBJLoader2Parallel.prototype = Object.assign(Object.create(OBJLoader2.prototype)
 	 */
 	buildWorkerCode: function () {
 
-		const codeBuilderInstructions = new CodeBuilderInstructions(true, true, this.preferJsmWorker);
+		const codeBuilderInstructions = new CodeBuilderInstructions( true, true, this.preferJsmWorker );
 
-		if (codeBuilderInstructions.isSupportsJsmWorker()) {
+		if ( codeBuilderInstructions.isSupportsJsmWorker() ) {
 
-			codeBuilderInstructions.setJsmWorkerUrl(this.jsmWorkerUrl);
+			codeBuilderInstructions.setJsmWorkerUrl( this.jsmWorkerUrl );
 
 		}
 
-		if (codeBuilderInstructions.isSupportsStandardWorker()) {
+		if ( codeBuilderInstructions.isSupportsStandardWorker() ) {
 
 			const objectManipulator = new ObjectManipulator();
-			const defaultWorkerPayloadHandler = new DefaultWorkerPayloadHandler(this.parser);
-			const workerRunner = new WorkerRunner({});
-			codeBuilderInstructions.addCodeFragment(CodeSerializer.serializeClass(OBJLoader2Parser, this.parser));
-			codeBuilderInstructions.addCodeFragment(CodeSerializer.serializeClass(ObjectManipulator, objectManipulator));
-			codeBuilderInstructions.addCodeFragment(CodeSerializer.serializeClass(DefaultWorkerPayloadHandler, defaultWorkerPayloadHandler));
-			codeBuilderInstructions.addCodeFragment(CodeSerializer.serializeClass(WorkerRunner, workerRunner));
+			const defaultWorkerPayloadHandler = new DefaultWorkerPayloadHandler( this.parser );
+			const workerRunner = new WorkerRunner( {} );
+			codeBuilderInstructions.addCodeFragment( CodeSerializer.serializeClass( OBJLoader2Parser, this.parser ) );
+			codeBuilderInstructions.addCodeFragment( CodeSerializer.serializeClass( ObjectManipulator, objectManipulator ) );
+			codeBuilderInstructions.addCodeFragment( CodeSerializer.serializeClass( DefaultWorkerPayloadHandler, defaultWorkerPayloadHandler ) );
+			codeBuilderInstructions.addCodeFragment( CodeSerializer.serializeClass( WorkerRunner, workerRunner ) );
 
 			const startCode = 'new ' + workerRunner.constructor.name + '( new ' + defaultWorkerPayloadHandler.constructor.name + '( new ' + this.parser.constructor.name + '() ) );';
-			codeBuilderInstructions.addStartCode(startCode);
+			codeBuilderInstructions.addStartCode( startCode );
 
 		}
 
@@ -129,28 +129,28 @@ OBJLoader2Parallel.prototype = Object.assign(Object.create(OBJLoader2.prototype)
 	/**
 	 * See {@link OBJLoader2.load}
 	 */
-	load: function (content, onLoad, onFileLoadProgress, onError, onMeshAlter) {
+	load: function ( content, onLoad, onFileLoadProgress, onError, onMeshAlter ) {
 
-		const scope = this;
-		function interceptOnLoad(object3d, message) {
+ 		const scope = this;
+		function interceptOnLoad( object3d, message ) {
 
-			if (object3d.name === 'OBJLoader2ParallelDummy') {
+			if ( object3d.name === 'OBJLoader2ParallelDummy' ) {
 
-				if (scope.parser.logging.enabled && scope.parser.logging.debug) {
+				if ( scope.parser.logging.enabled && scope.parser.logging.debug ) {
 
-					console.debug('Received dummy answer from OBJLoader2Parallel#parse');
+					console.debug( 'Received dummy answer from OBJLoader2Parallel#parse' );
 
 				}
 
 			} else {
 
-				onLoad(object3d, message);
+				onLoad( object3d, message );
 
 			}
 
 		}
 
-		OBJLoader2.prototype.load.call(this, content, interceptOnLoad, onFileLoadProgress, onError, onMeshAlter);
+		OBJLoader2.prototype.load.call( this, content, interceptOnLoad, onFileLoadProgress, onError, onMeshAlter );
 
 	},
 
@@ -159,40 +159,40 @@ OBJLoader2Parallel.prototype = Object.assign(Object.create(OBJLoader2.prototype)
 	 * The callback onLoad needs to be set to be able to receive the content if used in parallel mode.
 	 * Fallback is possible via {@link OBJLoader2Parallel#setExecuteParallel}.
 	 */
-	parse: function (content) {
+	parse: function ( content ) {
 
-		if (this.executeParallel) {
+		if ( this.executeParallel ) {
 
-			if (this.parser.callbacks.onLoad === this.parser._onLoad) {
+			if ( this.parser.callbacks.onLoad === this.parser._onLoad ) {
 
 				throw "No callback other than the default callback was provided! Aborting!";
 
 			}
 
 			// check if worker has been initialize before. If yes, skip init
-			if (!this.workerExecutionSupport.isWorkerLoaded(this.preferJsmWorker)) {
+			if ( ! this.workerExecutionSupport.isWorkerLoaded( this.preferJsmWorker ) ) {
 
-				this.workerExecutionSupport.buildWorker(this.buildWorkerCode());
+				this.workerExecutionSupport.buildWorker( this.buildWorkerCode() );
 
 				const scope = this;
-				const scopedOnAssetAvailable = function (payload) {
+				const scopedOnAssetAvailable = function ( payload ) {
 
-					scope._onAssetAvailable(payload);
+					scope._onAssetAvailable( payload );
 
 				};
 
-				function scopedOnLoad(message) {
+				function scopedOnLoad( message ) {
 
-					scope.parser.callbacks.onLoad(scope.baseObject3d, message);
+					scope.parser.callbacks.onLoad( scope.baseObject3d, message );
 
 				}
 
-				this.workerExecutionSupport.updateCallbacks(scopedOnAssetAvailable, scopedOnLoad);
+				this.workerExecutionSupport.updateCallbacks( scopedOnAssetAvailable, scopedOnLoad );
 
 			}
 
 			// Create default materials beforehand, but do not override previously set materials (e.g. during init)
-			this.materialHandler.createDefaultMaterials(false);
+			this.materialHandler.createDefaultMaterials( false );
 
 			this.workerExecutionSupport.executeParallel(
 				{
@@ -213,7 +213,7 @@ OBJLoader2Parallel.prototype = Object.assign(Object.create(OBJLoader2.prototype)
 						enabled: this.parser.logging.enabled,
 						debug: this.parser.logging.debug
 					}
-				});
+				} );
 
 			const dummy = new Object3D();
 			dummy.name = 'OBJLoader2ParallelDummy';
@@ -221,12 +221,12 @@ OBJLoader2Parallel.prototype = Object.assign(Object.create(OBJLoader2.prototype)
 
 		} else {
 
-			return OBJLoader2.prototype.parse.call(this, content);
+			return OBJLoader2.prototype.parse.call( this, content );
 
 		}
 
 	},
 
-});
+} );
 
 export { OBJLoader2Parallel };

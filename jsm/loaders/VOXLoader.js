@@ -1,62 +1,62 @@
 import {
 	FileLoader,
 	Loader
-} from "../../build/three.module.js";
+} from "../../../build/three.module.js";
 
-function VOXLoader(manager) {
+function VOXLoader( manager ) {
 
-	Loader.call(this, manager);
+	Loader.call( this, manager );
 
 }
 
-VOXLoader.prototype = Object.assign(Object.create(Loader.prototype), {
+VOXLoader.prototype = Object.assign( Object.create( Loader.prototype ), {
 
 	constructor: VOXLoader,
 
-	load: function (url, onLoad, onProgress, onError) {
+	load: function ( url, onLoad, onProgress, onError ) {
 
 		var scope = this;
 
-		var loader = new FileLoader(scope.manager);
-		loader.setPath(scope.path);
-		loader.setResponseType('arraybuffer');
-		loader.setRequestHeader(scope.requestHeader);
-		loader.load(url, function (buffer) {
+		var loader = new FileLoader( scope.manager );
+		loader.setPath( scope.path );
+		loader.setResponseType( 'arraybuffer' );
+		loader.setRequestHeader( scope.requestHeader );
+		loader.load( url, function ( buffer ) {
 
 			try {
 
-				onLoad(scope.parse(buffer));
+				onLoad( scope.parse( buffer ) );
 
-			} catch (e) {
+			} catch ( e ) {
 
-				if (onError) {
+				if ( onError ) {
 
-					onError(e);
+					onError( e );
 
 				} else {
 
-					console.error(e);
+					console.error( e );
 
 				}
 
-				scope.manager.itemError(url);
+				scope.manager.itemError( url );
 
 			}
 
-		}, onProgress, onError);
+		}, onProgress, onError );
 
 	},
 
-	parse: function (buffer) {
+	parse: function ( buffer ) {
 
-		const data = new DataView(buffer);
+		const data = new DataView( buffer );
 
-		const id = data.getInt32(0, true);
-		const version = data.getUint32(4, true);
+		const id = data.getInt32( 0, true );
+		const version = data.getUint32( 4, true );
 
-		if (id !== 542658390 || version !== 150) {
+		if ( id !== 542658390 || version !== 150 ) {
 
-			console.error('Not a valid VOX file');
+			console.error( 'Not a valid VOX file' );
 			return;
 
 		}
@@ -101,48 +101,48 @@ VOXLoader.prototype = Object.assign(Object.create(Loader.prototype), {
 		let chunk;
 		const chunks = [];
 
-		while (i < data.byteLength) {
+		while ( i < data.byteLength ) {
 
 			let id = '';
 
-			for (let j = 0; j < 4; j++) {
+			for ( let j = 0; j < 4; j ++ ) {
 
-				id += String.fromCharCode(data.getInt8(i++, true));
+				id += String.fromCharCode( data.getInt8( i ++, true ) );
 
 			}
 
-			const chunkSize = data.getInt32(i, true); i += 4;
-			data.getInt32(i, true); i += 4; // childChunks
+			const chunkSize = data.getInt32( i, true ); i += 4;
+			data.getInt32( i, true ); i += 4; // childChunks
 
-			if (id === 'SIZE') {
+			if ( id === 'SIZE' ) {
 
-				const x = data.getInt32(i, true); i += 4;
-				const y = data.getInt32(i, true); i += 4;
-				const z = data.getInt32(i, true); i += 4;
+				const x = data.getInt32( i, true ); i += 4;
+				const y = data.getInt32( i, true ); i += 4;
+				const z = data.getInt32( i, true ); i += 4;
 
 				chunk = {
 					palette: DEFAULT_PALETTE,
 					size: { x: x, y: y, z: z },
 				};
 
-				chunks.push(chunk);
+				chunks.push( chunk );
 
-				i += chunkSize - (3 * 4);
+				i += chunkSize - ( 3 * 4 );
 
-			} else if (id === 'XYZI') {
+			} else if ( id === 'XYZI' ) {
 
-				const numVoxels = data.getInt32(i, true); i += 4;
-				chunk.data = new Int8Array(buffer, i, numVoxels * 4);
+				const numVoxels = data.getInt32( i, true ); i += 4;
+				chunk.data = new Int8Array( buffer, i, numVoxels * 4 );
 
 				i += numVoxels * 4;
 
-			} else if (id === 'RGBA') {
+			} else if ( id === 'RGBA' ) {
 
-				const palette = [0];
+				const palette = [ 0 ];
 
-				for (let j = 0; j < 256; j++) {
+				for ( let j = 0; j < 256; j ++ ) {
 
-					palette[j + 1] = data.getInt32(i, true); i += 4;
+					palette[ j + 1 ] = data.getInt32( i, true ); i += 4;
 
 				}
 
@@ -162,6 +162,6 @@ VOXLoader.prototype = Object.assign(Object.create(Loader.prototype), {
 
 	}
 
-});
+} );
 
 export { VOXLoader };

@@ -35,7 +35,7 @@ import {
 	RGB_S3TC_DXT1_Format,
 	UnsignedByteType,
 	sRGBEncoding,
-} from '../../build/three.module.js';
+} from '../../../build/three.module.js';
 
 import { ZSTDDecoder } from '../libs/zstddec.module.js';
 
@@ -65,9 +65,9 @@ const DFDChannel = {
 
 class KTX2Loader extends CompressedTextureLoader {
 
-	constructor(manager) {
+	constructor( manager ) {
 
-		super(manager);
+		super( manager );
 
 		this.basisModule = null;
 		this.basisModulePending = null;
@@ -76,16 +76,16 @@ class KTX2Loader extends CompressedTextureLoader {
 
 	}
 
-	detectSupport(renderer) {
+	detectSupport( renderer ) {
 
 		this.transcoderConfig = {
-			astcSupported: renderer.extensions.has('WEBGL_compressed_texture_astc'),
-			etc1Supported: renderer.extensions.has('WEBGL_compressed_texture_etc1'),
-			etc2Supported: renderer.extensions.has('WEBGL_compressed_texture_etc'),
-			dxtSupported: renderer.extensions.has('WEBGL_compressed_texture_s3tc'),
-			bptcSupported: renderer.extensions.has('EXT_texture_compression_bptc'),
-			pvrtcSupported: renderer.extensions.has('WEBGL_compressed_texture_pvrtc')
-				|| renderer.extensions.has('WEBKIT_WEBGL_compressed_texture_pvrtc')
+			astcSupported: renderer.extensions.has( 'WEBGL_compressed_texture_astc' ),
+			etc1Supported: renderer.extensions.has( 'WEBGL_compressed_texture_etc1' ),
+			etc2Supported: renderer.extensions.has( 'WEBGL_compressed_texture_etc' ),
+			dxtSupported: renderer.extensions.has( 'WEBGL_compressed_texture_s3tc' ),
+			bptcSupported: renderer.extensions.has( 'EXT_texture_compression_bptc' ),
+			pvrtcSupported: renderer.extensions.has( 'WEBGL_compressed_texture_pvrtc' )
+				|| renderer.extensions.has( 'WEBKIT_WEBGL_compressed_texture_pvrtc' )
 		};
 
 		return this;
@@ -94,7 +94,7 @@ class KTX2Loader extends CompressedTextureLoader {
 
 	initModule() {
 
-		if (this.basisModulePending) {
+		if ( this.basisModulePending ) {
 
 			return;
 
@@ -105,9 +105,9 @@ class KTX2Loader extends CompressedTextureLoader {
 		// The Emscripten wrapper returns a fake Promise, which can cause
 		// infinite recursion when mixed with native Promises. Wrap the module
 		// initialization to return a native Promise.
-		scope.basisModulePending = new Promise(function (resolve) {
+		scope.basisModulePending = new Promise( function ( resolve ) {
 
-			MSC_TRANSCODER().then(function (basisModule) {
+			MSC_TRANSCODER().then( function ( basisModule ) {
 
 				scope.basisModule = basisModule;
 
@@ -115,53 +115,53 @@ class KTX2Loader extends CompressedTextureLoader {
 
 				resolve();
 
-			});
+			} );
 
-		});
+		} );
 
 	}
 
-	load(url, onLoad, onProgress, onError) {
+	load( url, onLoad, onProgress, onError ) {
 
 		var scope = this;
 
 		var texture = new CompressedTexture();
 
-		var bufferPending = new Promise(function (resolve, reject) {
+		var bufferPending = new Promise( function ( resolve, reject ) {
 
-			new FileLoader(scope.manager)
-				.setPath(scope.path)
-				.setResponseType('arraybuffer')
-				.load(url, resolve, onProgress, reject);
+			new FileLoader( scope.manager )
+				.setPath( scope.path )
+				.setResponseType( 'arraybuffer' )
+				.load( url, resolve, onProgress, reject );
 
-		});
+		} );
 
 		this.initModule();
 
-		Promise.all([bufferPending, this.basisModulePending]).then(function ([buffer]) {
+		Promise.all( [ bufferPending, this.basisModulePending ] ).then( function ( [ buffer ] ) {
 
-			scope.parse(buffer, function (_texture) {
+			scope.parse( buffer, function ( _texture ) {
 
-				texture.copy(_texture);
+				texture.copy( _texture );
 				texture.needsUpdate = true;
 
-				if (onLoad) onLoad(texture);
+				if ( onLoad ) onLoad( texture );
 
-			}, onError);
+			}, onError );
 
-		});
+		} );
 
 		return texture;
 
 	}
 
-	parse(buffer, onLoad, onError) {
+	parse( buffer, onLoad, onError ) {
 
 		var BasisLzEtc1sImageTranscoder = this.basisModule.BasisLzEtc1sImageTranscoder;
 		var UastcImageTranscoder = this.basisModule.UastcImageTranscoder;
 		var TextureFormat = this.basisModule.TextureFormat;
 
-		var ktx = new KTX2Container(this.basisModule, buffer);
+		var ktx = new KTX2Container( this.basisModule, buffer );
 
 		// TODO(donmccurdy): Should test if texture is transcodable before attempting
 		// any transcoding. If supercompressionScheme is KTX_SS_BASIS_LZ and dfd
@@ -171,8 +171,8 @@ class KTX2Loader extends CompressedTextureLoader {
 			? new UastcImageTranscoder()
 			: new BasisLzEtc1sImageTranscoder();
 
-		ktx.initMipmaps(transcoder, this.transcoderConfig)
-			.then(function () {
+		ktx.initMipmaps( transcoder, this.transcoderConfig )
+			.then( function () {
 
 				var texture = new CompressedTexture(
 					ktx.mipmaps,
@@ -187,10 +187,10 @@ class KTX2Loader extends CompressedTextureLoader {
 				texture.minFilter = ktx.mipmaps.length === 1 ? LinearFilter : LinearMipmapLinearFilter;
 				texture.magFilter = LinearFilter;
 
-				onLoad(texture);
+				onLoad( texture );
 
-			})
-			.catch(onError);
+			} )
+			.catch( onError );
 
 		return this;
 
@@ -200,7 +200,7 @@ class KTX2Loader extends CompressedTextureLoader {
 
 class KTX2Container {
 
-	constructor(basisModule, arrayBuffer) {
+	constructor( basisModule, arrayBuffer ) {
 
 		this.basisModule = basisModule;
 		this.arrayBuffer = arrayBuffer;
@@ -213,22 +213,22 @@ class KTX2Container {
 
 		// Confirm this is a KTX 2.0 file, based on the identifier in the first 12 bytes.
 		var idByteLength = 12;
-		var id = new Uint8Array(this.arrayBuffer, 0, idByteLength);
-		if (id[0] !== 0xAB || // '´'
-			id[1] !== 0x4B || // 'K'
-			id[2] !== 0x54 || // 'T'
-			id[3] !== 0x58 || // 'X'
-			id[4] !== 0x20 || // ' '
-			id[5] !== 0x32 || // '2'
-			id[6] !== 0x30 || // '0'
-			id[7] !== 0xBB || // 'ª'
-			id[8] !== 0x0D || // '\r'
-			id[9] !== 0x0A || // '\n'
-			id[10] !== 0x1A || // '\x1A'
-			id[11] !== 0x0A // '\n'
+		var id = new Uint8Array( this.arrayBuffer, 0, idByteLength );
+		if ( id[ 0 ] !== 0xAB || // '´'
+				id[ 1 ] !== 0x4B || // 'K'
+				id[ 2 ] !== 0x54 || // 'T'
+				id[ 3 ] !== 0x58 || // 'X'
+				id[ 4 ] !== 0x20 || // ' '
+				id[ 5 ] !== 0x32 || // '2'
+				id[ 6 ] !== 0x30 || // '0'
+				id[ 7 ] !== 0xBB || // 'ª'
+				id[ 8 ] !== 0x0D || // '\r'
+				id[ 9 ] !== 0x0A || // '\n'
+				id[ 10 ] !== 0x1A || // '\x1A'
+				id[ 11 ] !== 0x0A // '\n'
 		) {
 
-			throw new Error('THREE.KTX2Loader: Missing KTX 2.0 identifier.');
+			throw new Error( 'THREE.KTX2Loader: Missing KTX 2.0 identifier.' );
 
 		}
 
@@ -241,7 +241,7 @@ class KTX2Container {
 		///////////////////////////////////////////////////
 
 		var headerByteLength = 17 * Uint32Array.BYTES_PER_ELEMENT;
-		var headerReader = new KTX2BufferReader(this.arrayBuffer, idByteLength, headerByteLength, littleEndian);
+		var headerReader = new KTX2BufferReader( this.arrayBuffer, idByteLength, headerByteLength, littleEndian );
 
 		this.header = {
 
@@ -265,21 +265,21 @@ class KTX2Container {
 
 		};
 
-		if (this.header.pixelDepth > 0) {
+		if ( this.header.pixelDepth > 0 ) {
 
-			throw new Error('THREE.KTX2Loader: Only 2D textures are currently supported.');
-
-		}
-
-		if (this.header.arrayElementCount > 1) {
-
-			throw new Error('THREE.KTX2Loader: Array textures are not currently supported.');
+			throw new Error( 'THREE.KTX2Loader: Only 2D textures are currently supported.' );
 
 		}
 
-		if (this.header.faceCount > 1) {
+		if ( this.header.arrayElementCount > 1 ) {
 
-			throw new Error('THREE.KTX2Loader: Cube textures are not currently supported.');
+			throw new Error( 'THREE.KTX2Loader: Array textures are not currently supported.' );
+
+		}
+
+		if ( this.header.faceCount > 1 ) {
+
+			throw new Error( 'THREE.KTX2Loader: Cube textures are not currently supported.' );
 
 		}
 
@@ -289,19 +289,19 @@ class KTX2Container {
 		///////////////////////////////////////////////////
 
 		var levelByteLength = this.header.levelCount * 3 * 8;
-		var levelReader = new KTX2BufferReader(this.arrayBuffer, idByteLength + headerByteLength, levelByteLength, littleEndian);
+		var levelReader = new KTX2BufferReader( this.arrayBuffer, idByteLength + headerByteLength, levelByteLength, littleEndian );
 
 		this.levels = [];
 
-		for (var i = 0; i < this.header.levelCount; i++) {
+		for ( var i = 0; i < this.header.levelCount; i ++ ) {
 
-			this.levels.push({
+			this.levels.push( {
 
 				byteOffset: levelReader.nextUint64(),
 				byteLength: levelReader.nextUint64(),
 				uncompressedByteLength: levelReader.nextUint64(),
 
-			});
+			} );
 
 		}
 
@@ -322,8 +322,8 @@ class KTX2Container {
 
 		this.dfd = {
 
-			vendorId: dfdReader.skip(4 /* totalSize */).nextUint16(),
-			versionNumber: dfdReader.skip(2 /* descriptorType */).nextUint16(),
+			vendorId: dfdReader.skip( 4 /* totalSize */ ).nextUint16(),
+			versionNumber: dfdReader.skip( 2 /* descriptorType */ ).nextUint16(),
 			descriptorBlockSize: dfdReader.nextUint16(),
 			colorModel: dfdReader.nextUint8(),
 			colorPrimaries: dfdReader.nextUint8(),
@@ -341,28 +341,28 @@ class KTX2Container {
 
 		};
 
-		this.dfd.numSamples = (this.dfd.descriptorBlockSize / 4 - sampleStart) / sampleWords;
+		this.dfd.numSamples = ( this.dfd.descriptorBlockSize / 4 - sampleStart ) / sampleWords;
 
-		dfdReader.skip(7 /* bytesPlane[1-7] */);
+		dfdReader.skip( 7 /* bytesPlane[1-7] */ );
 
-		for (var i = 0; i < this.dfd.numSamples; i++) {
+		for ( var i = 0; i < this.dfd.numSamples; i ++ ) {
 
-			this.dfd.samples[i] = {
+			this.dfd.samples[ i ] = {
 
-				channelID: dfdReader.skip(3 /* bitOffset + bitLength */).nextUint8(),
+				channelID: dfdReader.skip( 3 /* bitOffset + bitLength */ ).nextUint8(),
 				// ... remainder not implemented.
 
 			};
 
-			dfdReader.skip(12 /* samplePosition[0-3], lower, upper */);
+			dfdReader.skip( 12 /* samplePosition[0-3], lower, upper */ );
 
 		}
 
-		if (this.header.vkFormat !== 0x00 /* VK_FORMAT_UNDEFINED */ &&
-			!(this.header.supercompressionScheme === 1 /* BasisLZ */ ||
-				this.dfd.colorModel === DFDModel.UASTC)) {
+		if ( this.header.vkFormat !== 0x00 /* VK_FORMAT_UNDEFINED */ &&
+			 ! ( this.header.supercompressionScheme === 1 /* BasisLZ */ ||
+				this.dfd.colorModel === DFDModel.UASTC ) ) {
 
-			throw new Error('THREE.KTX2Loader: Only Basis Universal supercompression is currently supported.');
+			throw new Error( 'THREE.KTX2Loader: Only Basis Universal supercompression is currently supported.' );
 
 		}
 
@@ -381,7 +381,7 @@ class KTX2Container {
 
 		this.sgd = {};
 
-		if (this.header.sgdByteLength <= 0) return;
+		if ( this.header.sgdByteLength <= 0 ) return;
 
 		var sgdReader = new KTX2BufferReader(
 			this.arrayBuffer,
@@ -402,9 +402,9 @@ class KTX2Container {
 		this.sgd.tablesData = null;
 		this.sgd.extendedData = null;
 
-		for (var i = 0; i < this.header.levelCount; i++) {
+		for ( var i = 0; i < this.header.levelCount; i ++ ) {
 
-			this.sgd.imageDescs.push({
+			this.sgd.imageDescs.push( {
 
 				imageFlags: sgdReader.nextUint32(),
 				rgbSliceByteOffset: sgdReader.nextUint32(),
@@ -412,7 +412,7 @@ class KTX2Container {
 				alphaSliceByteOffset: sgdReader.nextUint32(),
 				alphaSliceByteLength: sgdReader.nextUint32(),
 
-			});
+			} );
 
 		}
 
@@ -421,14 +421,14 @@ class KTX2Container {
 		var tablesByteOffset = selectorsByteOffset + this.sgd.selectorsByteLength;
 		var extendedByteOffset = tablesByteOffset + this.sgd.tablesByteLength;
 
-		this.sgd.endpointsData = new Uint8Array(this.arrayBuffer, endpointsByteOffset, this.sgd.endpointsByteLength);
-		this.sgd.selectorsData = new Uint8Array(this.arrayBuffer, selectorsByteOffset, this.sgd.selectorsByteLength);
-		this.sgd.tablesData = new Uint8Array(this.arrayBuffer, tablesByteOffset, this.sgd.tablesByteLength);
-		this.sgd.extendedData = new Uint8Array(this.arrayBuffer, extendedByteOffset, this.sgd.extendedByteLength);
+		this.sgd.endpointsData = new Uint8Array( this.arrayBuffer, endpointsByteOffset, this.sgd.endpointsByteLength );
+		this.sgd.selectorsData = new Uint8Array( this.arrayBuffer, selectorsByteOffset, this.sgd.selectorsByteLength );
+		this.sgd.tablesData = new Uint8Array( this.arrayBuffer, tablesByteOffset, this.sgd.tablesByteLength );
+		this.sgd.extendedData = new Uint8Array( this.arrayBuffer, extendedByteOffset, this.sgd.extendedByteLength );
 
 	}
 
-	async initMipmaps(transcoder, config) {
+	async initMipmaps( transcoder, config ) {
 
 		await this.zstd.init();
 
@@ -446,9 +446,9 @@ class KTX2Container {
 		var isVideo = false;
 
 		// PVRTC1 transcoders (from both ETC1S and UASTC) only support power of 2 dimensions.
-		var pvrtcTranscodable = MathUtils.isPowerOfTwo(width) && MathUtils.isPowerOfTwo(height);
+		var pvrtcTranscodable = MathUtils.isPowerOfTwo( width ) && MathUtils.isPowerOfTwo( height );
 
-		if (texFormat === TextureFormat.ETC1S) {
+		if ( texFormat === TextureFormat.ETC1S ) {
 
 			var numEndpoints = this.sgd.endpointCount;
 			var numSelectors = this.sgd.selectorCount;
@@ -456,78 +456,78 @@ class KTX2Container {
 			var selectors = this.sgd.selectorsData;
 			var tables = this.sgd.tablesData;
 
-			transcoder.decodePalettes(numEndpoints, endpoints, numSelectors, selectors);
-			transcoder.decodeTables(tables);
+			transcoder.decodePalettes( numEndpoints, endpoints, numSelectors, selectors );
+			transcoder.decodeTables( tables );
 
 		}
 
 
 		var targetFormat;
 
-		if (config.astcSupported) {
+		if ( config.astcSupported ) {
 
 			targetFormat = TranscodeTarget.ASTC_4x4_RGBA;
 			this.transcodedFormat = RGBA_ASTC_4x4_Format;
 
-		} else if (config.bptcSupported && texFormat === TextureFormat.UASTC4x4) {
+		} else if ( config.bptcSupported && texFormat === TextureFormat.UASTC4x4 ) {
 
 			targetFormat = TranscodeTarget.BC7_M5_RGBA;
 			this.transcodedFormat = RGBA_BPTC_Format;
 
-		} else if (config.dxtSupported) {
+		} else if ( config.dxtSupported ) {
 
 			targetFormat = hasAlpha ? TranscodeTarget.BC3_RGBA : TranscodeTarget.BC1_RGB;
 			this.transcodedFormat = hasAlpha ? RGBA_S3TC_DXT5_Format : RGB_S3TC_DXT1_Format;
 
-		} else if (config.pvrtcSupported && pvrtcTranscodable) {
+		} else if ( config.pvrtcSupported && pvrtcTranscodable ) {
 
 			targetFormat = hasAlpha ? TranscodeTarget.PVRTC1_4_RGBA : TranscodeTarget.PVRTC1_4_RGB;
 			this.transcodedFormat = hasAlpha ? RGBA_PVRTC_4BPPV1_Format : RGB_PVRTC_4BPPV1_Format;
 
-		} else if (config.etc2Supported) {
+		} else if ( config.etc2Supported ) {
 
 			targetFormat = hasAlpha ? TranscodeTarget.ETC2_RGBA : TranscodeTarget.ETC1_RGB/* subset of ETC2 */;
 			this.transcodedFormat = hasAlpha ? RGBA_ETC2_EAC_Format : RGB_ETC2_Format;
 
-		} else if (config.etc1Supported) {
+		} else if ( config.etc1Supported ) {
 
 			targetFormat = TranscodeTarget.ETC1_RGB;
 			this.transcodedFormat = RGB_ETC1_Format;
 
 		} else {
 
-			console.warn('THREE.KTX2Loader: No suitable compressed texture format found. Decoding to RGBA32.');
+			console.warn( 'THREE.KTX2Loader: No suitable compressed texture format found. Decoding to RGBA32.' );
 
 			targetFormat = TranscodeTarget.RGBA32;
 			this.transcodedFormat = RGBAFormat;
 
 		}
 
-		if (!this.basisModule.isFormatSupported(targetFormat, texFormat)) {
+		if ( ! this.basisModule.isFormatSupported( targetFormat, texFormat ) ) {
 
-			throw new Error('THREE.KTX2Loader: Selected texture format not supported by current transcoder build.');
+			throw new Error( 'THREE.KTX2Loader: Selected texture format not supported by current transcoder build.' );
 
 		}
 
 		var imageDescIndex = 0;
 
-		for (var level = 0; level < this.header.levelCount; level++) {
+		for ( var level = 0; level < this.header.levelCount; level ++ ) {
 
-			var levelWidth = Math.ceil(width / Math.pow(2, level));
-			var levelHeight = Math.ceil(height / Math.pow(2, level));
+			var levelWidth = Math.ceil( width / Math.pow( 2, level ) );
+			var levelHeight = Math.ceil( height / Math.pow( 2, level ) );
 
 			var numImagesInLevel = 1; // TODO(donmccurdy): Support cubemaps, arrays and 3D.
 			var imageOffsetInLevel = 0;
-			var imageInfo = new ImageInfo(texFormat, levelWidth, levelHeight, level);
-			var levelByteLength = this.levels[level].byteLength;
-			var levelUncompressedByteLength = this.levels[level].uncompressedByteLength;
+			var imageInfo = new ImageInfo( texFormat, levelWidth, levelHeight, level );
+			var levelByteLength = this.levels[ level ].byteLength;
+			var levelUncompressedByteLength = this.levels[ level ].uncompressedByteLength;
 
-			for (var imageIndex = 0; imageIndex < numImagesInLevel; imageIndex++) {
+			for ( var imageIndex = 0; imageIndex < numImagesInLevel; imageIndex ++ ) {
 
 				var result;
 				var encodedData;
 
-				if (texFormat === TextureFormat.UASTC4x4) {
+				if ( texFormat === TextureFormat.UASTC4x4 ) {
 
 					// UASTC
 
@@ -537,21 +537,21 @@ class KTX2Container {
 					imageInfo.alphaByteOffset = 0;
 					imageInfo.alphaByteLength = 0;
 
-					encodedData = new Uint8Array(this.arrayBuffer, this.levels[level].byteOffset + imageOffsetInLevel, levelByteLength);
+					encodedData = new Uint8Array( this.arrayBuffer, this.levels[ level ].byteOffset + imageOffsetInLevel, levelByteLength );
 
-					if (this.header.supercompressionScheme === 2 /* ZSTD */) {
+					if ( this.header.supercompressionScheme === 2 /* ZSTD */ ) {
 
-						encodedData = this.zstd.decode(encodedData, levelUncompressedByteLength);
+						encodedData = this.zstd.decode( encodedData, levelUncompressedByteLength );
 
 					}
 
-					result = transcoder.transcodeImage(targetFormat, encodedData, imageInfo, 0, hasAlpha, isVideo);
+					result = transcoder.transcodeImage( targetFormat, encodedData, imageInfo, 0, hasAlpha, isVideo );
 
 				} else {
 
 					// ETC1S
 
-					var imageDesc = this.sgd.imageDescs[imageDescIndex++];
+					var imageDesc = this.sgd.imageDescs[ imageDescIndex ++ ];
 
 					imageInfo.flags = imageDesc.imageFlags;
 					imageInfo.rgbByteOffset = 0;
@@ -559,15 +559,15 @@ class KTX2Container {
 					imageInfo.alphaByteOffset = imageDesc.alphaSliceByteOffset > 0 ? imageDesc.rgbSliceByteLength : 0;
 					imageInfo.alphaByteLength = imageDesc.alphaSliceByteLength;
 
-					encodedData = new Uint8Array(this.arrayBuffer, this.levels[level].byteOffset + imageDesc.rgbSliceByteOffset, imageDesc.rgbSliceByteLength + imageDesc.alphaSliceByteLength);
+					encodedData = new Uint8Array( this.arrayBuffer, this.levels[ level ].byteOffset + imageDesc.rgbSliceByteOffset, imageDesc.rgbSliceByteLength + imageDesc.alphaSliceByteLength );
 
-					result = transcoder.transcodeImage(targetFormat, encodedData, imageInfo, 0, isVideo);
+					result = transcoder.transcodeImage( targetFormat, encodedData, imageInfo, 0, isVideo );
 
 				}
 
-				if (result.transcodedImage === undefined) {
+				if ( result.transcodedImage === undefined ) {
 
-					throw new Error('THREE.KTX2Loader: Unable to transcode image.');
+					throw new Error( 'THREE.KTX2Loader: Unable to transcode image.' );
 
 				}
 
@@ -579,7 +579,7 @@ class KTX2Container {
 				var levelData = result.transcodedImage.get_typed_memory_view().slice();
 				result.transcodedImage.delete();
 
-				mipmaps.push({ data: levelData, width: levelWidth, height: levelHeight });
+				mipmaps.push( { data: levelData, width: levelWidth, height: levelHeight } );
 				imageOffsetInLevel += levelByteLength;
 
 			}
@@ -626,11 +626,11 @@ class KTX2Container {
 		// choosing appropriate transcode target formats or providing queries
 		// for applications so they know what to do with the content.
 
-		if (this.getTexFormat() === TextureFormat.UASTC4x4) {
+		if ( this.getTexFormat() === TextureFormat.UASTC4x4 ) {
 
 			// UASTC
 
-			if ((this.dfd.samples[0].channelID & 0xF) === DFDChannel.UASTC.RGBA) {
+			if ( ( this.dfd.samples[ 0 ].channelID & 0xF ) === DFDChannel.UASTC.RGBA ) {
 
 				return true;
 
@@ -642,7 +642,7 @@ class KTX2Container {
 
 		// ETC1S
 
-		if (this.dfd.numSamples === 2 && (this.dfd.samples[1].channelID & 0xF) === DFDChannel.ETC1S.AAA) {
+		if ( this.dfd.numSamples === 2 && ( this.dfd.samples[ 1 ].channelID & 0xF ) === DFDChannel.ETC1S.AAA ) {
 
 			return true;
 
@@ -654,7 +654,7 @@ class KTX2Container {
 
 	getPremultiplyAlpha() {
 
-		return !!(this.dfd.flags & 1 /* KHR_DF_FLAG_ALPHA_PREMULTIPLIED */);
+		return !! ( this.dfd.flags & 1 /* KHR_DF_FLAG_ALPHA_PREMULTIPLIED */ );
 
 	}
 
@@ -662,9 +662,9 @@ class KTX2Container {
 
 class KTX2BufferReader {
 
-	constructor(arrayBuffer, byteOffset, byteLength, littleEndian) {
+	constructor( arrayBuffer, byteOffset, byteLength, littleEndian ) {
 
-		this.dataView = new DataView(arrayBuffer, byteOffset, byteLength);
+		this.dataView = new DataView( arrayBuffer, byteOffset, byteLength );
 		this.littleEndian = littleEndian;
 		this.offset = 0;
 
@@ -672,7 +672,7 @@ class KTX2BufferReader {
 
 	nextUint8() {
 
-		var value = this.dataView.getUint8(this.offset, this.littleEndian);
+		var value = this.dataView.getUint8( this.offset, this.littleEndian );
 
 		this.offset += 1;
 
@@ -682,7 +682,7 @@ class KTX2BufferReader {
 
 	nextUint16() {
 
-		var value = this.dataView.getUint16(this.offset, this.littleEndian);
+		var value = this.dataView.getUint16( this.offset, this.littleEndian );
 
 		this.offset += 2;
 
@@ -692,7 +692,7 @@ class KTX2BufferReader {
 
 	nextUint32() {
 
-		var value = this.dataView.getUint32(this.offset, this.littleEndian);
+		var value = this.dataView.getUint32( this.offset, this.littleEndian );
 
 		this.offset += 4;
 
@@ -703,13 +703,13 @@ class KTX2BufferReader {
 	nextUint64() {
 
 		// https://stackoverflow.com/questions/53103695/
-		var left = this.dataView.getUint32(this.offset, this.littleEndian);
-		var right = this.dataView.getUint32(this.offset + 4, this.littleEndian);
-		var value = this.littleEndian ? left + (2 ** 32 * right) : (2 ** 32 * left) + right;
+		var left = this.dataView.getUint32( this.offset, this.littleEndian );
+		var right = this.dataView.getUint32( this.offset + 4, this.littleEndian );
+		var value = this.littleEndian ? left + ( 2 ** 32 * right ) : ( 2 ** 32 * left ) + right;
 
-		if (!Number.isSafeInteger(value)) {
+		if ( ! Number.isSafeInteger( value ) ) {
 
-			console.warn('THREE.KTX2Loader: ' + value + ' exceeds MAX_SAFE_INTEGER. Precision may be lost.');
+			console.warn( 'THREE.KTX2Loader: ' + value + ' exceeds MAX_SAFE_INTEGER. Precision may be lost.' );
 
 		}
 
@@ -719,7 +719,7 @@ class KTX2BufferReader {
 
 	}
 
-	skip(bytes) {
+	skip( bytes ) {
 
 		this.offset += bytes;
 
