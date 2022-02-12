@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>three.js ar - hit test</title>
+    <title>Kalamandu - AR</title>
     <meta charset="utf-8" />
     <meta
       name="viewport"
@@ -16,10 +16,73 @@
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()"
           >&times;</a
         >
-        <a class="ar-object" id="1" href="#">Art 1</a>
-        <a class="ar-object" id="2" href="#">Art 2</a>
-        <a class="ar-object" id="3" href="#">Art 3</a>
-        <a class="ar-object" id="4" href="#">Art 4</a>
+        <a
+          class="ar-object"
+          id="1"
+          href="#"
+          style="display: flex; align-items: center; flex-direction: column"
+          >Tibetan Mandala
+          <img
+            style="
+              height: 80px;
+              width: 80px;
+              object-fit: cover;
+              margin-bottom: 20px;
+            "
+            src="assets/1-tibetan-mandala.jpg"
+            alt="paintings"
+        /></a>
+
+        <a
+          class="ar-object"
+          id="2"
+          href="#"
+          style="display: flex; align-items: center; flex-direction: column"
+          >Krishna Radha
+          <img
+            style="
+              height: 80px;
+              width: 80px;
+              object-fit: cover;
+              margin-bottom: 20px;
+            "
+            src="assets/2-Krishna-Radha.jpg"
+            alt="paintings"
+        /></a>
+
+        <a
+          class="ar-object"
+          id="3"
+          href="#"
+          style="display: flex; align-items: center; flex-direction: column"
+          >Mithilla Painting
+          <img
+            style="
+              height: 80px;
+              width: 80px;
+              object-fit: cover;
+              margin-bottom: 20px;
+            "
+            src="assets/3-Mithilla-Art.jpg"
+            alt="paintings"
+        /></a>
+
+        <a
+          class="ar-object"
+          id="4"
+          href="#"
+          style="display: flex; align-items: center; flex-direction: column"
+          >Golden Bowl
+          <img
+            style="
+              height: 80px;
+              width: 80px;
+              object-fit: cover;
+              margin-bottom: 20px;
+            "
+            src="assets/4-bowl.jpg"
+            alt="paintings"
+        /></a>
       </div>
 
       <div id="container" style="position: fixed"></div>
@@ -40,7 +103,7 @@
 
     <script>
       function openNav() {
-        document.getElementById("mySidenav").style.width = "250px";
+        document.getElementById("mySidenav").style.width = "300px";
       }
 
       function closeNav() {

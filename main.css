@@ -60,7 +60,7 @@ body {
 #VRButton {
   margin-bottom: 70px !important;
   border: 2px solid #14151a !important;
-  background-color: #f1f1f1 !important;
+  background-color: #ffffff !important;
   color: #14151a !important;
   font-weight: bold !important;
 }
@@ -68,6 +68,6 @@ body {
 #ARButton {
   border: 2px solid #14151a !important;
   color: #14151a !important;
-  background-color: #f1f1f1 !important;
+  background-color: #ffffff !important;
   font-weight: bold !important;
 }
